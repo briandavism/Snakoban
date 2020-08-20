@@ -12,18 +12,30 @@ public class PlayerController : MonoBehaviour
         // Input Detection and movement.
         if (Input.GetButtonDown("Up"))
         {
-            transform.Translate(Vector2.up);
+            if (LegalMove(Vector2.up))
+            {
+                transform.Translate(Vector2.up);
+            }
         } else if (Input.GetButtonDown("Down"))
         {
-            transform.Translate(Vector2.down);
+            if (LegalMove(Vector2.down))
+            {
+                transform.Translate(Vector2.down);
+            }
         }
         else if (Input.GetButtonDown("Right"))
         {
-            transform.Translate(Vector2.right);
+            if (LegalMove(Vector2.right))
+            {
+                transform.Translate(Vector2.right);
+            }
         }
         else if (Input.GetButtonDown("Left"))
         {
-            transform.Translate(Vector2.left);
+            if (LegalMove(Vector2.left))
+            {
+                transform.Translate(Vector2.left);
+            }
         }
 
     }
@@ -33,18 +45,42 @@ public class PlayerController : MonoBehaviour
     {
         bool result = true;
 
-        Vector2 pos = new Vector2(transform.position.x, transform.position.y);
-        RaycastHit2D hit = Physics2D.Linecast(pos, pos + direction);
+        Vector2 pos = new Vector2(transform.position.x + 0.5f, transform.position.y + 0.5f);
+        RaycastHit2D hit = Physics2D.Linecast(pos + direction, pos + direction);
+        Debug.DrawLine(pos, pos + direction, Color.red, 6f, false);
+
+        // If nothing hit, return true.
+        if (!hit)
+        {
+            Debug.Log("No hit.");
+
+            return result;
+        }
 
         if (hit.transform.tag == "Wall")
         {
+            Debug.Log("Wall hit.");
+
             result = false;
         } else if (hit.transform.tag == "Crate")
         {
+            Debug.Log("Crate hit.");
+
             result = hit.transform.gameObject.GetComponent<CrateController>().LegalMove(direction);
+
+            // If a crate move is possible, move the crate as well.
+            if (result)
+            {
+                hit.transform.gameObject.GetComponent<CrateController>().PushCrate(direction);
+            }
+        }
+        else if (hit.transform.tag == "Player")
+        {
+            // Placeholder for when the player hits themselves.
+            Debug.Log("Player hit.");
+            
         }
 
         return result;
-        ;
     }
 }
